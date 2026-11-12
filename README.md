@@ -37,7 +37,8 @@ AstrBot ──HTTP(+Bearer token)──▶ dsh-astrbot-bridge:8399 ──ctx.age
 插件是 `link:` 依赖，改代码后重启 DSH 生效：
 
 ```bash
-dsh plugin --profile desktop add link:D:/harness/dsh-astrbot-bridge
+git clone https://github.com/umeabc/dsh-astrbot-bridge
+dsh plugin --profile desktop add link:<克隆下来的路径>/dsh-astrbot-bridge
 ```
 
 再把包名加进 profile 的 `dsh.profile.bundles`（否则 `cordis.patch.yml` 里的
