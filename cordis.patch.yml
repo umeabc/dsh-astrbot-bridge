@@ -1,0 +1,29 @@
+# dsh-astrbot-bridge: expose a token-protected HTTP API that an AstrBot
+# plugin can call, and optionally hold an outbound relay tunnel to a
+# rendezvous server so the bot can reach this desktop behind NAT.
+- insert:
+    - id: astrbot-bridge
+      name: dsh-astrbot-bridge
+      config:
+        # Empty = reuse the generated token in ~/.dsh/astrbot-bridge.token.
+        token: ''
+        # 每轮结束后释放 agent，桌面端才能打开同一条会话继续聊；false 则一直持有。
+        releaseAfterTurn: true
+        http:
+          enabled: true
+          host: 127.0.0.1
+          port: 8399
+        relay:
+          enabled: false
+          url: ''          # host:port of relay-server.mjs
+          room: ''         # 32 hex chars, shared with the bot
+          key: ''          # base64url 16-byte room key, shared with the bot
+        # 这些只是「设置 → AstrBot 桥接」首次打开时的默认值；
+        # 之后在设置页里保存的值优先。
+        agent:
+          workspace: ''          # 绝对路径，例如 D:/harness
+          permission: ''         # 例如 danger-full-access；空 = DSH 默认
+          provider: ''           # 例如 openai-codex；空 = 桌面默认渠道
+          model: ''              # 例如 gpt-6.1-sol；空 = 桌面默认模型
+          timeoutSeconds: 900
+          sessionsPerPage: 15
