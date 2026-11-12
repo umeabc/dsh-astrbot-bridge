@@ -128,6 +128,12 @@ const direct = await runPython([
   '--api-url', apiUrl,
   '--token', token,
 ]);
+if (direct.code === 2) {
+  console.log(String.fromCharCode(10) + 'relay-e2e: SKIP python checks (AstrBot plugin repo not found next to this one)');
+  relay.child.kill();
+  ctx.disposeAll();
+  process.exit(failures === 0 ? 0 : 1);
+}
 check('python direct client passes', direct.code === 0, direct.code);
 
 console.log('relay transport');

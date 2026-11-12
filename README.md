@@ -198,6 +198,9 @@ npm test            # api-e2e（HTTP+设置路由），relay-e2e（relay + Pytho
 node test/relay-e2e.mjs   # 需要带 cryptography 的 Python；自动挑一个
 ```
 
+`relay-e2e` 的 Python 半边需要把 [`astrbot-plugin-dsh`](https://github.com/umeabc/astrbot-plugin-dsh)
+克隆到本仓库同级目录（或用 `DSH_TEST_PYTHON` 指定解释器、`DSH_ASTRBOT_PLUGIN_DIR` 指定插件路径），找不到时自动跳过。
+
 `test/api-e2e.mjs` 用一个假宿主（`test/mock-ctx.mjs`）覆盖：鉴权、会话新建/继续/切换、
 分页与工作区分组、设置读写与工作区校验、错误码。
 `test/relay-e2e.mjs` 会拉起 `relay-server.mjs`，再用 AstrBot 那头的 Python 客户端分别走

@@ -16,6 +16,10 @@ import sys
 from pathlib import Path
 
 PLUGIN_DIR = Path(os.environ.get("DSH_ASTRBOT_PLUGIN_DIR", Path(__file__).resolve().parent.parent.parent / "astrbot-plugin-dsh"))
+if not (PLUGIN_DIR / "dsh_astrbot_client.py").is_file():
+    print(f"SKIP: AstrBot client not found at {PLUGIN_DIR}")
+    print("      clone https://github.com/umeabc/astrbot-plugin-dsh next to this repo, or set DSH_ASTRBOT_PLUGIN_DIR")
+    raise SystemExit(2)
 sys.path.insert(0, str(PLUGIN_DIR))
 
 from dsh_astrbot_client import BridgeClient, BridgeError  # noqa: E402
