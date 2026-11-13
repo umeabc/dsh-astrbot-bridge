@@ -102,6 +102,8 @@ dsh plugin --profile desktop add link:<克隆下来的路径>/dsh-astrbot-bridge
 - 默认只看「DSH 注册过的工作区」里的会话，并且跳过没有标题的空白会话——这两条都能在设置页关掉
   （「对话列表」卡片），关掉后就是本机会话库里的全部内容；
 - `/dsh <序号>` 可以把聊天接到这些会话上，之后 `/dsh <指令>` 就在里面继续——恢复时**沿用该会话自己的渠道/模型**，不会被设置页的默认值改掉；
+- 编号与列表严格一致：扁平顺序按工作区连续排列，`/dsh <n>` 优先按「最近一次 `/dshls` 打印的那份列表」解析（30 分钟内有效），
+  避免两次计算之间新会话出现导致错位；确认回执会带上会话名与工作区；
 - 正在桌面端打开着的会话会被占用（同一会话 id 不能有两个 agent），这时会明确回「这个会话正被 DSH 桌面端打开」；
 - 子代理（`origin: subagent`）的会话不出现在列表里；标题是按页懒加载并缓存 60 秒，列表最多取最近 200 条（`LocalSessions.list` 的默认上限）。
 
@@ -119,7 +121,7 @@ curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8399/v1/health
 | GET | `/v1/health` | 版本、工作区、权限、渠道、模型、中转状态 |
 | POST | `/v1/chat` | `{chatKey, text, follow?, newSession?, sessionId?, timeoutMs?, user?}` → `{text, sessionId, durationMs, turns, interrupted, workspace, error, attachments, user}` |
 | GET | `/v1/sessions?chatKey=&page=&perPage=&includeLocal=` | 按工作区分组的一页会话（默认把本机已有会话也列进来），每条带 `user`/`external`/`origin`，`total/pages/offset/currentSession` |
-| POST | `/v1/switch` | `{chatKey, sessionId}` 或 `{chatKey, index}`：把聊天指向某条会话（`index` 就是 `/dshls` 里的全局序号） |
+| POST | `/v1/switch` | `{chatKey, sessionId}` 或 `{chatKey, index}`：把聊天指向某条会话（`index` 就是 `/dshls` 里的全局序号，按最近一次列表解析），返回 `title/workspace/index` |
 | POST | `/v1/cancel` | `{chatKey}`：取消正在跑的那一轮 |
 | GET | `/v1/notify` | 「已结束但没确认收到」的结果/报错；确认前会重复返回（至少一次），可按 `chatKey` 过滤 |
 | POST | `/v1/ack` | `{chatKey, turnId}`：确认收到；推送成功后再 ack，失败则下轮重试 |

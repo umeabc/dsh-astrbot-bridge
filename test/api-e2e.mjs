@@ -358,6 +358,43 @@ console.log('attachments');
   check('answers without files list nothing', plainTurn.json.attachments.length === 0, plainTurn.json.attachments);
 }
 
+console.log('numbering matches switching');
+{
+  // Two workspaces interleaved in time: the printed numbers must still address
+  // exactly the sessions the user sees.
+  const t = Date.now();
+  ctx._state.workspaces = [{ id: 'w1', path: 'D:/work', title: 'work' }, { id: 'w2', path: 'D:/game', title: 'game' }];
+  ctx._state.localSessions = [
+    { header: { id: 'mix-a1', cwd: 'D:/work', createdAt: t - 10_000 } },
+    { header: { id: 'mix-b1', cwd: 'D:/game', createdAt: t - 20_000 } },
+    { header: { id: 'mix-a2', cwd: 'D:/work', createdAt: t - 30_000 } },
+    { header: { id: 'mix-b2', cwd: 'D:/game', createdAt: t - 40_000 } },
+  ];
+  plugin.bridgeInstance().local.listCache = null;
+  plugin.bridgeInstance().local.titles.clear();
+
+  const chatKey = 'qq/order/1';
+  const page = await call(base, `/v1/sessions?chatKey=${encodeURIComponent(chatKey)}&perPage=15&page=1`);
+  const flat = page.json.workspaces.flatMap((group) => group.sessions);
+  check('both workspaces are listed', flat.filter((entry) => entry.origin === 'desktop').length === 4, flat.map((entry) => entry.id));
+
+  let mismatches = [];
+  let first = null;
+  for (let position = 0; position < flat.length; position += 1) {
+    const response = await call(base, '/v1/switch', {
+      method: 'POST',
+      body: { chatKey, index: position + 1 },
+    });
+    if (position === 0) first = response.json;
+    if (response.json.sessionId !== flat[position].id) {
+      mismatches.push({ index: position + 1, expected: flat[position].id, actual: response.json.sessionId });
+    }
+  }
+  check('every printed number switches to its own session', mismatches.length === 0, mismatches);
+  check('the switch response names the session', String(first?.title ?? '').startsWith('桌面 '), first?.title);
+  check('the switch response reports the index', first?.index === 1, first?.index);
+}
+
 ctx.disposeAll();
 console.log(failures === 0 ? '\napi-e2e: PASS' : `\napi-e2e: ${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);
