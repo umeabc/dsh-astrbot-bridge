@@ -27,3 +27,5 @@
           model: ''              # 例如 gpt-6.1-sol；空 = 桌面默认模型
           timeoutSeconds: 900
           sessionsPerPage: 15
+          showUntitled: false     # 列表里要不要显示没有标题的空白会话
+          workspacesOnly: true    # 只显示 DSH 已注册工作区里的会话

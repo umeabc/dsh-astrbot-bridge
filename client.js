@@ -38,6 +38,8 @@ window.__ModuleLoader__.load({
 .dsha-btn:disabled{opacity:.5;cursor:default}
 .dsha-switch{display:inline-flex;align-items:center;gap:7px;margin-left:auto;font-size:12.5px;line-height:18px;color:var(--dsw-alias-label-secondary);cursor:pointer;user-select:none}
 .dsha-switch input{accent-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#0f1115));width:15px;height:15px;margin:0;cursor:pointer}
+.dsha-check{display:flex;align-items:center;gap:8px;font-size:13px;line-height:20px;color:var(--dsw-alias-label-primary);cursor:pointer;user-select:none}
+.dsha-check input{accent-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#0f1115));width:15px;height:15px;margin:0;cursor:pointer}
 .dsha-note{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary);margin:0}
 .dsha-error{font-size:12px;line-height:18px;color:var(--dsw-alias-state-error-primary)}
 .dsha-ok{font-size:12px;line-height:18px;color:var(--dsw-alias-state-success-primary)}
@@ -83,6 +85,10 @@ window.__ModuleLoader__.load({
         saving: '保存中…',
         saved: '已保存',
         loadFailed: '读取设置失败',
+        listTitle: '对话列表',
+        showUntitled: '显示未命名会话（没有标题的空白会话）',
+        workspacesOnly: '只显示桌面工作区里的会话',
+        listHint: '关闭「未命名」可以把桌面上没聊过就关掉的空会话挡掉；「只显示桌面工作区」按 DSH 注册的工作区过滤，方向和桌面端一致。',
         tip: '工作区与权限从下一轮对话起生效；渠道和模型只影响新建的会话；中转修改保存后立即重连。',
       },
       en: {
@@ -121,6 +127,10 @@ window.__ModuleLoader__.load({
         saving: 'Saving…',
         saved: 'Saved',
         loadFailed: 'Cannot load settings',
+        listTitle: 'Conversation list',
+        showUntitled: 'Show untitled sessions (blank conversations)',
+        workspacesOnly: 'Only sessions inside workspace folders',
+        listHint: 'Hiding untitled sessions drops blank ones that were opened and closed; the workspace filter mirrors what the desktop shows.',
         tip: 'Workspace and permission apply from the next turn; provider and model only affect new sessions; relay changes reconnect immediately after saving.',
       },
     };
@@ -193,6 +203,8 @@ window.__ModuleLoader__.load({
             model: settings.model ?? '',
             timeoutSeconds: settings.timeoutSeconds ?? 900,
             sessionsPerPage: settings.sessionsPerPage ?? 15,
+            showUntitled: settings.showUntitled === true,
+            workspacesOnly: settings.workspacesOnly !== false,
             relayEnabled: relay.enabled === true,
             relayUrl: relay.url ?? '',
             relayRoom: relay.room ?? '',
@@ -234,6 +246,8 @@ window.__ModuleLoader__.load({
             model: draft.model,
             timeoutSeconds: draft.timeoutSeconds,
             sessionsPerPage: draft.sessionsPerPage,
+            showUntitled: draft.showUntitled === true,
+            workspacesOnly: draft.workspacesOnly !== false,
             relay: {
               enabled: draft.relayEnabled === true,
               url: draft.relayUrl,
@@ -426,7 +440,25 @@ window.__ModuleLoader__.load({
               notice !== '' ? h('span', { className: 'dsha-ok' }, notice) : null,
               error !== '' ? h('span', { className: 'dsha-error' }, error) : null),
 
-            h('p', { className: 'dsha-note' }, t.tip)));
+            h('p', { className: 'dsha-note' }, t.tip)),
+
+          h('div', { className: 'dsha-card' },
+            h('div', { className: 'dsha-head' }, h('span', { className: 'dsha-title' }, t.listTitle)),
+            h('label', { className: 'dsha-check' },
+              h('input', {
+                type: 'checkbox',
+                checked: draft.showUntitled === true,
+                onChange: update('showUntitled'),
+              }),
+              h('span', null, t.showUntitled)),
+            h('label', { className: 'dsha-check' },
+              h('input', {
+                type: 'checkbox',
+                checked: draft.workspacesOnly !== false,
+                onChange: update('workspacesOnly'),
+              }),
+              h('span', null, t.workspacesOnly)),
+            h('p', { className: 'dsha-note' }, t.listHint)));
       };
     }
 

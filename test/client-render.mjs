@@ -107,6 +107,8 @@ const snapshot = {
     model: 'gpt-6.1-sol',
     timeoutSeconds: 900,
     sessionsPerPage: 15,
+    showUntitled: false,
+    workspacesOnly: true,
     relay: { enabled: true, url: 'relay.example.com:9443', room: 'ab'.repeat(16), key: 'Zm9vYmFyYmF6cXV4MTIzNDU2Nw' },
   },
   saved: {},
@@ -193,6 +195,7 @@ const Component = sections[0].Component;
   check('relay room is prefilled', text.includes('abababababababab'), text.slice(0, 600));
   check('generate button is offered', text.includes('生成一对'), text.slice(0, 600));
   check('status shows relay state', text.includes('未连接'), text.slice(0, 500));
+  check('list visibility controls are offered', text.includes('显示未命名会话') && text.includes('只显示桌面工作区里的会话'), text.slice(-400));
 }
 
 /** The bundle captured `React` from factory(require); reuse the scripted shim. */

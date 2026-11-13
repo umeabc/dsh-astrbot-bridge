@@ -26,7 +26,7 @@ import { parseJsonObject, readText, sendJson, sendText } from './lib/http.js';
 export const name = 'dsh-astrbot-bridge';
 export const inject = ['agents', 'sessions'];
 
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 
 const DEFAULTS = {
   token: '',

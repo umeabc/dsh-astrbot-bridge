@@ -169,7 +169,11 @@ export function makeCtx({ reply = (prompt) => `echo: ${prompt}`, delay = 10, onT
           readTitleSnapshots: async (ids) => ids.map((id) => ({
             sessionId: id,
             status: 'fulfilled',
-            value: { session: { id }, title: { title: `桌面 ${id}` } },
+            value: {
+              session: { id },
+              // Sessions that never held a conversation have no title event.
+              ...(id.startsWith('desk-blank') ? {} : { title: { title: `桌面 ${id}` } }),
+            },
           })),
         };
       }

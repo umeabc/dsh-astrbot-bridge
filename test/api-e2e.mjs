@@ -122,10 +122,12 @@ const base = bridge.api.address;
 
 // Sessions that already exist on this desktop (created by the GUI or the phone bridge).
 const now = Date.now();
+ctx._state.workspaces = [{ id: 'w1', path: 'D:/work', title: 'work' }];
 ctx._state.localSessions = [
   { header: { id: 'desk-1', cwd: 'D:/work', createdAt: now - 60_000 } },
   { header: { id: 'desk-2', cwd: 'D:/harness', createdAt: now - 120_000 } },
-  { header: { id: 'desk-sub', cwd: 'D:/harness', createdAt: now - 5_000, origin: 'subagent' } },
+  { header: { id: 'desk-blank-1', cwd: 'D:/work', createdAt: now - 30_000 } },
+  { header: { id: 'desk-sub', cwd: 'D:/work', createdAt: now - 5_000, origin: 'subagent' } },
 ];
 console.log(`bridge listening on ${base}`);
 
@@ -173,10 +175,26 @@ console.log('local sessions');
   const listing = await call(base, '/v1/sessions?chatKey=qq%2Flocal%2F1');
   const entries = listing.json.workspaces.flatMap((group) => group.sessions);
   const desktop = entries.filter((entry) => entry.origin === 'desktop');
-  check('desktop sessions are listed', desktop.length === 2, entries.map((entry) => entry.id));
-  check('desktop session titles are folded', desktop.every((entry) => entry.title.startsWith('桌面 desk-')), desktop);
+  check('desktop sessions are listed', desktop.length === 1 && desktop[0].id === 'desk-1', entries.map((entry) => entry.id));
+  check('desktop session titles are folded', desktop[0]?.title === '桌面 desk-1', desktop);
+  check('untitled sessions are hidden by default', !entries.some((entry) => entry.id.startsWith('desk-blank')), entries.map((entry) => entry.id));
+  check('sessions outside registered workspaces are hidden', !entries.some((entry) => entry.id === 'desk-2'), entries.map((entry) => entry.id));
   check('subagent sessions are hidden', !entries.some((entry) => entry.id === 'desk-sub'), entries.map((entry) => entry.id));
-  check('desktop sessions keep their workspace', entries.some((entry) => entry.workspace === 'D:/work'), entries.map((entry) => entry.workspace));
+  check('desktop sessions keep their workspace', desktop[0]?.workspace === 'D:/work', desktop[0]?.workspace);
+
+  const shown = await callRoute(ctx, '/__astrbot/settings', {
+    method: 'POST',
+    body: JSON.stringify({ settings: { showUntitled: true, workspacesOnly: false } }),
+  });
+  check('visibility toggles save', shown.status === 200 && shown.json?.settings?.showUntitled === true && shown.json?.settings?.workspacesOnly === false, shown.json?.settings);
+  const widened = await call(base, '/v1/sessions?chatKey=qq%2Flocal%2F1');
+  const widenedEntries = widened.json.workspaces.flatMap((group) => group.sessions);
+  check('untitled sessions become visible', widenedEntries.some((entry) => entry.id === 'desk-blank-1'), widenedEntries.map((entry) => entry.id));
+  check('other workspaces become visible', widenedEntries.some((entry) => entry.id === 'desk-2'), widenedEntries.map((entry) => entry.id));
+  await callRoute(ctx, '/__astrbot/settings', {
+    method: 'POST',
+    body: JSON.stringify({ settings: { showUntitled: false, workspacesOnly: true } }),
+  });
 
   const switched = await call(base, '/v1/switch', { method: 'POST', body: { chatKey: 'qq/local/1', sessionId: 'desk-1' } });
   check('switching to a desktop session works', switched.status === 200 && switched.json.sessionId === 'desk-1', switched.json);

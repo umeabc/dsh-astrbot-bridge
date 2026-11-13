@@ -49,6 +49,8 @@ const snapshot = {
     model: 'deepseek-v4.1-flash',
     timeoutSeconds: 900,
     sessionsPerPage: 15,
+    showUntitled: false,
+    workspacesOnly: true,
     relay: { enabled: true, url: 'relay.example.com:9443', room: '3f2a9c41d07b6e58a1c4f0d93b7e6a25', key: 'Zm9vYmFyYmF6cXV4MTIzNDU2Nw' },
   },
   presets: { names: ['workspace-write', 'danger-full-access'], current: 'danger-full-access' },

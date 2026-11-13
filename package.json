@@ -1,6 +1,6 @@
 {
   "name": "dsh-astrbot-bridge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "Token-protected HTTP bridge and relay tunnel that let AstrBot drive DeepSeek Harness sessions.",
